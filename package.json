@@ -13,6 +13,7 @@
   "author": "Phil25",
   "license": "ISC",
   "dependencies": {
-    "steam": "^1.4.0"
+    "steam-totp": "^2.0.1",
+    "steam-user": "^3.21.7"
   }
 }
