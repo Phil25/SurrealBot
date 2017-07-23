@@ -3,6 +3,7 @@ var	EAccessLevel	= require('../enums/EAccessLevel.js'),
 
 module.exports.accessLevel	= EAccessLevel.Admin;
 module.exports.names		= ["say", "s", "sayto"];
+module.exports.description	= "Say something as Sophie.";
 
 
 //----------[ Exec ]----------//

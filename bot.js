@@ -1,7 +1,7 @@
 try{
-	var config = require('./config');
+	var config = require('./config.js');
 }catch(err){
-	console.error("Error parsing config.json:\n" + err.message);
+	console.error("Error parsing config.js:\n" + err.message);
 	return;
 }
 
@@ -10,11 +10,12 @@ var SteamUser	= require('steam-user'),
 	SteamTotp	= require('steam-totp'),
 	cmdProc		= require('./cmds/cmdproc.js'),
 	net			= require('./lib/net.js'),
-	db			= require('./lib/db.js');
+	db			= require('./lib/db.js'),
+	accessCheck	= require('./lib/accessCheck.js');
 
 net.start(config);
 db.start(config);
-var members = db.getMembers(config);
+accessCheck.setMembers(db.getMembers(config));
 
 client.logOn({
 	"accountName": config.username,
@@ -34,7 +35,12 @@ client.on('error', function(e){
 
 client.on('friendMessage', function(steamID, message){
 	if(message[0] == '/' || message[0] == '!'){
-		cmdProc.process({client: client, steamID: steamID, members: members, message: message, net: net})
+		cmdProc.process({
+			client: client,
+			steamID: steamID,
+			message: message,
+			net: net
+		});
 		return;
 	}
 	client.chatMessage(steamID, "What?");

@@ -3,29 +3,14 @@ var	EAccessLevel	= require('../enums/EAccessLevel.js'),
 
 module.exports.accessLevel	= EAccessLevel.Everyone;
 module.exports.names		= ["players", "p"];
+module.exports.description	= "List players on requested server.";
 
 
 //----------[ Declarations ]----------//
 
 var	SourceQuery	= require('sourcequery'),
-	sq			= new SourceQuery(1000);
-
-var servers = [
-	{
-		name: "10x_Redone",
-		calls: ["1", "r", "10x", "10x_redone", "redone"],
-		ip: "178.32.157.24",
-		port: 27018
-		//ip: "31.186.251.170",
-		//port: 27015
-	},
-	{
-		name: "Snow Arena",
-		calls: ["s", "snow", "snow_arena"],
-		ip: "176.10.148.132",
-		port: 24035
-	}
-];
+	sq			= new SourceQuery(1000),
+	servers		= require('../config.js').servers;
 
 var callId = -1;
 
@@ -33,6 +18,7 @@ var callId = -1;
 //----------[ Exec ]----------//
 
 module.exports.exec = function(data){
+	servers
 	if(callId != -1){
 		data.client.chatMessage(data.steamID, "Currently fetching data, please wait.");
 		return;

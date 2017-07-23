@@ -3,6 +3,7 @@ var	EAccessLevel	= require('../enums/EAccessLevel.js'),
 
 module.exports.accessLevel	= EAccessLevel.HeadAdmin;
 module.exports.names		= ["wipe", "clearfriends"];
+module.exports.description	= "Wipe Sophie's friendslist except admins and VIPs.";
 
 
 //----------[ Exec ]----------//
