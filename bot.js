@@ -7,7 +7,14 @@ try{
 
 var SteamUser	= require('steam-user'),
 	client		= new SteamUser(),
-	SteamTotp	= require('steam-totp');
+	SteamTotp	= require('steam-totp'),
+	cmdProc		= require('./cmds/cmdproc.js'),
+	net			= require('./lib/net.js'),
+	db			= require('./lib/db.js');
+
+net.start(config);
+db.start(config);
+var members = db.getMembers(config);
 
 client.logOn({
 	"accountName": config.username,
@@ -25,10 +32,10 @@ client.on('error', function(e){
 	console.error(e);
 });
 
-/*client.on('webSession', function(sessionID, cookies){
-	console.log("Got web session");
+client.on('friendMessage', function(steamID, message){
+	if(message[0] == '/' || message[0] == '!'){
+		cmdProc.process({client: client, steamID: steamID, members: members, message: message, net: net})
+		return;
+	}
+	client.chatMessage(steamID, "What?");
 });
-
-client.on('newItems', function(count){
-	console.log(count + " new items in inventory");
-});*/
