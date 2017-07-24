@@ -11,11 +11,13 @@ var SteamUser	= require('steam-user'),
 	cmdProc		= require('./cmds/cmdproc.js'),
 	net			= require('./lib/net.js'),
 	db			= require('./lib/db.js'),
-	accessCheck	= require('./lib/accessCheck.js');
+	accessCheck	= require('./lib/accessCheck.js'),
+	membersSet	= false;
 
 net.start(config);
-db.start(config);
-accessCheck.setMembers(db.getMembers(config));
+db.start(config, membersSet);
+var members = db.getMembers(config);
+accessCheck.setMembers(members);
 
 client.logOn({
 	"accountName": config.username,
@@ -35,12 +37,15 @@ client.on('error', function(e){
 
 client.on('friendMessage', function(steamID, message){
 	if(message[0] == '/' || message[0] == '!'){
-		cmdProc.process({
-			client: client,
-			steamID: steamID,
-			message: message,
-			net: net
-		});
+		if(members.headAdmins.length > 0)
+			cmdProc.process({
+				client: client,
+				steamID: steamID,
+				message: message,
+				net: net
+			});
+		else
+			client.chatMessage(steamID, "Commands not fully initialized, try again later. If the problem persists, please contact Phil25.");
 		return;
 	}
 	client.chatMessage(steamID, "What?");
