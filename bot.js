@@ -8,7 +8,7 @@ try{
 var SteamUser	= require('steam-user'),
 	client		= new SteamUser(),
 	SteamTotp	= require('steam-totp'),
-	cmdProc		= require('./cmds/cmdproc.js'),
+	cmdProc		= require('./lib/cmdProc.js'),
 	net			= require('./lib/net.js'),
 	db			= require('./lib/db.js'),
 	accessCheck	= require('./lib/accessCheck.js');

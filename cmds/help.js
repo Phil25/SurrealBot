@@ -9,10 +9,7 @@ module.exports.description	= "List accessible commands.";
 
 const fs = require('fs');
 var	cmds = [], cmdCount = 0;
-fs.readdirSync('./cmds/').forEach(file => {
-	if(file != "cmdproc.js")
-		cmds[cmdCount++] = require('./' + file);
-});
+fs.readdirSync('./cmds/').forEach(file => cmds[cmdCount++] = require('./' + file));
 var ac = require('../lib/accessCheck.js');
 
 
