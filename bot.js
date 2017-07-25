@@ -11,11 +11,10 @@ var SteamUser	= require('steam-user'),
 	cmdProc		= require('./cmds/cmdproc.js'),
 	net			= require('./lib/net.js'),
 	db			= require('./lib/db.js'),
-	accessCheck	= require('./lib/accessCheck.js'),
-	membersSet	= false;
+	accessCheck	= require('./lib/accessCheck.js');
 
-net.start(config);
-db.start(config, membersSet);
+net.start();
+db.start(config);
 var members = db.getMembers(config);
 accessCheck.setMembers(members);
 
