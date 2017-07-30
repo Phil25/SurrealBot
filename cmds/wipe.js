@@ -10,5 +10,5 @@ module.exports.description	= "Wipe Sophie's friendslist except admins and VIPs."
 
 module.exports.exec = function(data){
 	data.client.chatMessage(data.steamID, "Command not implemented, grab Phil!");
-	return ECommandResult.OK;
+	return ECommandResult.Handled;
 }

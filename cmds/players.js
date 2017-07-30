@@ -21,16 +21,16 @@ module.exports.exec = function(data){
 	servers
 	if(callId != -1){
 		data.client.chatMessage(data.steamID, "Currently fetching data, please wait.");
-		return;
+		return ECommandResult.Handled;
 	}
 	if(data.args.length < 2){
 		data.client.chatMessage(data.steamID, "Server not specified, usage: !players <server>.");
-		return;
+		return ECommandResult.Handled;
 	}
 	callId = getServer(data.args[1]);
 	if(callId == -1){
 		data.client.chatMessage(data.steamID, "Unknown server specifier, please use 10x or snow.");
-		return;
+		return ECommandResult.Handled;
 	}
 	sq.open(servers[callId].ip, servers[callId].port);
 	
@@ -38,7 +38,7 @@ module.exports.exec = function(data){
 		if(!players){
 			data.client.chatMessage(data.steamID, "Could not fetch players of " + servers[callId].name + ". Server could be down.");
 			callId = -1;
-			return;
+			return ECommandResult.Handled;
 		}
 		var response = players.length + " player(s) on " + servers[callId].name;
 		if(data.args.length > 2 && data.args[2][0] == "f"){
@@ -50,7 +50,7 @@ module.exports.exec = function(data){
 		callId = -1;
 		sq.close();
 	});
-	return ECommandResult.OK;
+	return ECommandResult.Handled;
 }
 
 

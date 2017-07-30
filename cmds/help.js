@@ -24,5 +24,5 @@ module.exports.exec = function(data){
 		}
 	help = count + " accessible commands:" + help;
 	data.client.chatMessage(data.steamID, help);
-	return ECommandResult.OK;
+	return ECommandResult.Handled;
 }

@@ -11,7 +11,7 @@ module.exports.description	= "Execute an rcon command. (use with caution)";
 module.exports.exec = function(data){
 	if(data.args.length < 3){
 		data.client.chatMessage(data.steamID, "Usage: !rcon <server> <command>");
-		return;
+		return ECommandResult.Handled;
 	}
 	var command = "";
 	for(var i = 2; i < data.args.length; i++)
@@ -20,5 +20,5 @@ module.exports.exec = function(data){
 		data.client.chatMessage(data.steamID, message);
 	}))
 		data.client.chatMessage(data.steamID, "Invalid server specifier or server offline.");
-	return ECommandResult.OK;
+	return ECommandResult.Handled;
 }

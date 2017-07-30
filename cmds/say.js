@@ -11,7 +11,7 @@ module.exports.description	= "Say something as Sophie.";
 module.exports.exec = function(data){
 	if(data.args.length < 3){
 		data.client.chatMessage(data.steamID, "Usage: !say <server> <message>");
-		return;
+		return ECommandResult.Handled;
 	}
 	var command = "";
 	for(var i = 2; i < data.args.length; i++)
@@ -19,5 +19,5 @@ module.exports.exec = function(data){
 	command = command.replace(";", "");
 	if(!data.net.send(data.args[1], "bot_say " + command))
 		data.client.chatMessage(data.steamID, "Invalid server specifier or server offline.");
-	return ECommandResult.OK;
+	return ECommandResult.Handled;
 }
