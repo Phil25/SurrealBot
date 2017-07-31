@@ -2,10 +2,17 @@
 Steam bot of [Surreal Surfing](http://steamcommunity.com/groups/SurrealSurfing).
 Working example (if online) [here](http://steamcommunity.com/id/SurrealSurfing).
 
-# Overview
+# Contents
+* [Overview](#overview-)
+* [Dependencies](#dependencies-)
+* [Features](#features-)
+* [Commands](#commands-)
+* [SourceMod Plugin](#sourcemod-plugin-)
+
+# Overview [^](#contents)
 Node.js Steam bot written using [Dr. McKay](https://www.doctormckay.com/)'s Steam modules. Made purely to supply Surreal Surfing Team Fortress 2 community management purpouses, including rcon execution, notification broadcasts, game server communication and many others. __This bot is Work in Progress__.
 
-# Dependencies
+# Dependencies [^](#contents)
 * [steam-user](https://github.com/DoctorMcKay/node-steam-user)
 * [steamcommunity](https://github.com/DoctorMcKay/node-steamcommunity)
 * [steamid](https://github.com/DoctorMcKay/node-steamid)
@@ -13,7 +20,7 @@ Node.js Steam bot written using [Dr. McKay](https://www.doctormckay.com/)'s Stea
 * [sourcequery](https://github.com/flamescape/SourceQuery)
 * [mysql](https://github.com/mysqljs/mysql)
 
-# Features
+# Features [^](#contents)
 * ##### Game server communication
     * Sets up a server to which gameserver-side SourceMod plugin sends a register request.
         * `.reg:servername`
@@ -29,7 +36,7 @@ Node.js Steam bot written using [Dr. McKay](https://www.doctormckay.com/)'s Stea
     * Executed by putting `!` or `/` at the beginning of the chat message.
     * Exec function has automatic access to `data` object containing:
         * `client` — the `SteamUser` client,
-        * steamID — of the user,
+        * `steamID` — of the user,
         * `net` — object for game server communication,
         * `args` — array of arguments; `0` being the command itself.
 * ##### Friend flag system as nicknames
@@ -41,7 +48,7 @@ Node.js Steam bot written using [Dr. McKay](https://www.doctormckay.com/)'s Stea
     * Subscriptions are saved via friend flags.
     * Bot will broadcast a message to all appropriate subscribers should it detect a new notification displaying the amount.
 
-# Commands
+# Commands [^](#contents)
 Command | Description | Usage | Access
 -|-|-|-
 `!broadcast`| Broadcast a message to specified flags.|`!broadcast <flags> <message> <...>`|_HeadAdmin_
@@ -52,3 +59,27 @@ Command | Description | Usage | Access
 `!say`|Say something as bot on a server.|`!say <server> <message> <...>`|_Admin_
 `!subscribe`|Subscribe to notifications.|`!(un)subscribe <group/bot>`|_Everyone_
 `!wipe`|Wipe bot's friends list of flagless friends.|`!wipe`|_HeadAdmin_
+
+# SourceMod Plugin [^](#contents)
+##### Overview
+Provides a mean for the server to communicate with the bot. At this point, there is no way of sending a register message without modifying the source code. Additionaly, implements a chat bot using Cleverbot API with a help of a wrapper created by Headline; this functionaliy is disabled if the Cleverbot API key is not provided in the cvar.
+##### Cvars
+* `sm_surrealbot_ip` — IP to the machine running the bot.
+* `sm_surrealbot_port` — Port the bot is running on.
+* `sm_surrealbot_apikey` — Your Cleverbot API key _(cvars below are not used if `apikey` is not provided)_.
+* `sm_surrealbot_botname` — Bot name as it appears in chat. _(Default: SurrealBot)_
+* `sm_surrealbot_namecolor` — Bot name color as it appears in chat. _([Default](http://www.color-hex.com/color/669aaf))_
+* `sm_surrealbot_textcolor` — Bot text color as it appears in chat. _([Default](http://www.color-hex.com/color/a0c8d7))_
+##### Dependencies
+* [Socket](https://forums.alliedmods.net/showthread.php?t=67640)
+* [Sourcemod API Wrapper by Headline](https://forums.alliedmods.net/showthread.php?t=293445)
+
+
+
+
+
+
+
+
+
+
