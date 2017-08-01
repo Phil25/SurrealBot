@@ -14,7 +14,6 @@ Handle	g_hMsgArray		= INVALID_HANDLE;
 float	g_fNextMessage	= 0.0;
 char	g_sConvoId[128];
 
-Handle	g_hClientSocket	= null;
 char	g_sRegMessage[24], g_sCmdResponse[2048];
 
 ConVar g_hCvarIp;	char	g_sCvarIp[64]	= "localhost";
@@ -24,6 +23,15 @@ ConVar g_hCvarApiKey;	char g_sCvarApiKey[64]	= "none";
 ConVar g_hCvarBotName;	char g_sCvarBotName[64]	= "SurrealBot";
 ConVar g_hCvarNameColor;char g_sCvarNameColor[8]= "669aaf";
 ConVar g_hCvarTextColor;char g_sCvarTextColor[8]= "a0c8d7";
+
+int g_iLastConseqConnection = 0;
+float g_fConseqConnects[] = {
+	1.0, 1.0, 1.0,
+	2.0, 2.0, 5.0,
+	10.0, 15.0, 20.0,
+	30.0, 45.0, 60.0,
+	120.0, 180.0, 240.0
+};
 
 
 public Plugin myinfo = {
@@ -46,7 +54,7 @@ public void OnPluginStart(){
 	g_hMsgArray = CreateArray(255);
 
 	g_hCvarIp		= CreateConVar("sm_surrealbot_ip",		g_sCvarIp, "IP to the SurrealBot", FCVAR_NOTIFY);
-	g_hCvarIp.AddChangeHook(ConVarChange_Ip);				g_hCvarIp.GetString(g_sCvarIp, sizeof(g_hCvarNameColor));
+	g_hCvarIp.AddChangeHook(ConVarChange_Ip);				g_hCvarIp.GetString(g_sCvarIp, sizeof(g_sCvarIp));
 	g_hCvarPort		= CreateConVar("sm_surrealbot_port",	"1234", "Port to the SurrealBot", FCVAR_NOTIFY);
 	g_hCvarPort.AddChangeHook(ConVarChange_Port);			g_iCvarPort = g_hCvarPort.IntValue;
 
@@ -57,10 +65,15 @@ public void OnPluginStart(){
 	g_hCvarNameColor= CreateConVar("sm_surrealbot_namecolor", g_sCvarNameColor, "Bot name color in chat.", FCVAR_NOTIFY);
 	g_hCvarNameColor.AddChangeHook(ConVarChange_NameColor);	g_hCvarNameColor.GetString(g_sCvarNameColor, sizeof(g_sCvarNameColor));
 	g_hCvarTextColor= CreateConVar("sm_surrealbot_textcolor", g_sCvarTextColor, "Bot text color in chat.", FCVAR_NOTIFY);
-	g_hCvarTextColor.AddChangeHook(ConVarChange_TextColor);	g_hCvarTextColor.GetString(g_sCvarTextColor, sizeof(g_hCvarNameColor));
+	g_hCvarTextColor.AddChangeHook(ConVarChange_TextColor);	g_hCvarTextColor.GetString(g_sCvarTextColor, sizeof(g_sCvarTextColor));
 
 	RegAdminCmd("bot_say", Command_BotSay, ADMFLAG_RCON, "Say something as bot.");
-	CreateTimer(5.0, Timer_OnPluginStartPost);
+
+}
+
+public void OnConfigsExecuted(){
+
+	ConnectToBot();
 
 }
 
@@ -183,14 +196,14 @@ public int ConVarChange_TextColor(Handle hCvar, const char[] sOld, const char[] 
 //  -  B O T   N E T W O R K I N G  -  //
 //*************************************//
 
-public Action Timer_OnPluginStartPost(Handle hTimer){
+public Action Timer_ConnectToBot(Handle hTimer, Handle hSocket){
 
-	ConnectToBot();
+	ConnectToBot(hSocket);
 	return Plugin_Stop;
 
 }
 
-void ConnectToBot(){
+void ConnectToBot(Handle& hSocket=null){
 
 	char sServerName[32];
 	FindConVar("hostname").GetString(sServerName, 32);
@@ -210,27 +223,26 @@ void ConnectToBot(){
 	else if(StrContains(sServerName, "greatfissure", false) != -1)
 		strcopy(g_sRegMessage, 24, ".reg:greatfissure");
 
-	g_hClientSocket = SocketCreate(SOCKET_TCP, Socket_OnError);
-	SocketSetOption(g_hClientSocket, SocketKeepAlive, 1);
+	hSocket = SocketCreate(SOCKET_TCP, Socket_OnError);
+	SocketSetOption(hSocket, SocketKeepAlive, 1);
 
-	PrintToServer("Establishing connection to SurrealBot...");
-	SocketConnect(g_hClientSocket, Socket_OnConnected, Socket_OnChildReceive, Socket_OnChildDisconnected, g_sCvarIp, g_iCvarPort);
+	PrintToServer("Establishing connection to %s at %s:%d", g_sCvarBotName, g_sCvarIp, g_iCvarPort);
+	SocketConnect(hSocket, Socket_OnConnected, Socket_OnChildReceive, Socket_OnChildDisconnected, g_sCvarIp, g_iCvarPort);
 
 }
 
 public int Socket_OnConnected(Handle hSocket, any arg){
 
-	PrintToServer("> > > Connection to SurrealBot established (sent %s)", g_sRegMessage);
-	SocketSend(g_hClientSocket, g_sRegMessage, strlen(g_sRegMessage));
+	PrintToServer("> > > Connection to %s established (sent %s)", g_sCvarBotName, g_sRegMessage);
+	ResetReconnection();
+	SocketSend(hSocket, g_sRegMessage, strlen(g_sRegMessage));
 
 }
 
 public int Socket_OnError(Handle hSocket, const int iErrorType, const int iErrorNum, any arg){
 
-	LogError("Socket error %d (%d)", iErrorType, iErrorNum);
-	delete hSocket;
-	hSocket = null;
-	ConnectToBot();
+	//LogError("Socket error %d (%d)", iErrorType, iErrorNum);
+	CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
 
 }
 
@@ -244,10 +256,8 @@ public int Socket_OnChildReceive(Handle hSocket, char[] sData, const int iDataSi
 
 public int Socket_OnChildDisconnected(Handle hSocket, any aFile){
 
-	PrintToServer("> > > Connection to SurrealBot lost!");
-	delete hSocket;
-	hSocket = null;
-	ConnectToBot();
+	PrintToServer("> > > Connection to %s lost!", g_sCvarBotName);
+	CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
 
 }
 
@@ -276,4 +286,22 @@ public Action Command_BotSay(int client, int args){
 
 	return Plugin_Handled;
 
+}
+
+
+//*************************//
+//  -  C O M M A N D S  -  //
+//*************************//
+
+float NextReconnection(){
+
+	if(++g_iLastConseqConnection >= sizeof(g_fConseqConnects))
+		g_iLastConseqConnection = sizeof(g_fConseqConnects) -1;
+
+	return g_fConseqConnects[g_iLastConseqConnection];
+
+}
+
+void ResetReconnection(){
+	g_iLastConseqConnection = 0;
 }
