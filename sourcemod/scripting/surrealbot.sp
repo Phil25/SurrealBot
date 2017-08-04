@@ -11,6 +11,8 @@
 
 
 Handle	g_hMsgArray		= INVALID_HANDLE;
+Handle	g_hTimer		= INVALID_HANDLE;
+
 float	g_fNextMessage	= 0.0;
 char	g_sConvoId[128];
 
@@ -199,6 +201,7 @@ public int ConVarChange_TextColor(Handle hCvar, const char[] sOld, const char[] 
 public Action Timer_ConnectToBot(Handle hTimer, Handle hSocket){
 
 	ConnectToBot(hSocket);
+	g_hTimer = null;
 	return Plugin_Stop;
 
 }
@@ -242,7 +245,12 @@ public int Socket_OnConnected(Handle hSocket, any arg){
 public int Socket_OnError(Handle hSocket, const int iErrorType, const int iErrorNum, any arg){
 
 	//LogError("Socket error %d (%d)", iErrorType, iErrorNum);
-	CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
+	if(g_hTimer != null){
+		delete g_hTimer;
+		g_hTimer = null;
+	}
+
+	g_hTimer = CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
 
 }
 
@@ -257,7 +265,12 @@ public int Socket_OnChildReceive(Handle hSocket, char[] sData, const int iDataSi
 public int Socket_OnChildDisconnected(Handle hSocket, any aFile){
 
 	PrintToServer("> > > Connection to %s lost!", g_sCvarBotName);
-	CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
+	if(g_hTimer != null){
+		delete g_hTimer;
+		g_hTimer = null;
+	}
+
+	g_hTimer = CreateTimer(NextReconnection(), Timer_ConnectToBot, hSocket);
 
 }
 
